@@ -1,0 +1,73 @@
+Dim indexR As Integer
+Dim indexC As Integer
+Dim level As Integer
+Dim flag As Boolean
+
+Sub showFiles()
+    Dim myFileName As String
+
+    
+    Dim fso As FileSystemObject
+    Dim fd As Folder
+        
+    Sheets(1).Rows.Clear
+    
+    With Application.FileDialog(msoFileDialogFolderPicker)
+         If .Show = 0 Then
+             End
+         End If
+         myFileName = .SelectedItems(1)
+    End With
+    
+        Set fso = CreateObject("Scripting.FileSystemObject")
+        Set fd = fso.GetFolder(myFileName)
+        
+        
+        
+        '开始读取数据
+        
+        indexR = 1
+        indexC = 1
+        Sheets(1).Cells(indexR, indexC) = myFileName
+        
+        indexR = indexR + 1
+        
+             
+        SearchFiles fd
+    
+End Sub
+
+Sub SearchFiles(ByVal fd As Folder)
+
+    Dim fl As File
+    Dim sfd As Folder
+    
+    indexC = indexC + 1
+    
+    '通过循环逐个列出文件名
+    For Each fl In fd.Files
+        Sheets(1).Cells(indexR, indexC) = fl.Name
+        Sheets(1).Cells(indexR, indexC).Characters.Font.ColorIndex = 3      '文件为红色
+        indexR = indexR + 1
+    Next fl
+    
+   
+    If fd.SubFolders.Count = 0 Then
+   ' indexC = indexC - level
+    indexC = indexC - 1
+    'level = 0
+    flag = True
+    Exit Sub 'SubFolders返回由指定文件夹中所有子文件夹（包括隐藏文件夹和系统文件夹）组成的 Folders 集合
+    End If
+        
+    For Each sfd In fd.SubFolders '在 Folders 集合进行循环查找
+        Sheets(1).Cells(indexR, indexC) = sfd.Name
+        Sheets(1).Cells(indexR, indexC).Characters.Font.ColorIndex = 5      '文件夹为蓝色
+        indexR = indexR + 1
+        'level = level + 1
+        SearchFiles sfd '使用递归方法查找下一个文件夹
+    Next
+    If flag = True Then
+        indexC = indexC - 1
+    End If
+End Sub
